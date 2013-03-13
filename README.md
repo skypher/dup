@@ -7,7 +7,7 @@ Fast no-frills duplicate file finder.
 
 Yes, I've tried a couple of them. Unfortunately they were much too
 slow and each one had a different way to specify the details of
-
+their behavior.
 
 So I wrote this utility in a day, featuring sane defaults, clean code
 that is easy to modify, decent speed and a very simple interface.
