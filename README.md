@@ -27,11 +27,11 @@ provide any facility for configuring which files to include in the
 duplication scan.
 
 Instead you provide it with a file that contains a list of files; the
-`find` utility is ideally suited to this task:
+widespread `find` utility is ideally suited to this task:
 
     find target_dir1 target_dir2 -type f -size +10M > files.txt
 
-Then you can run dup:
+Then you can run dup on the resulting list of files:
 
     ./dup.py files.txt
 
@@ -47,13 +47,18 @@ file, anything else to not remove any of them.
 
     * file names that include newline characters
     * directories -- use `-type f` with find to exclude them
-    * more than two duplicates
 
 * To keep things efficient hashing only looks at the first 1024^2 bytes of
 each file. You can easily change that number in the source.
 
 * No provisions are made for efficient interruption and resumption of the
-  process (save for terminal suspend/resume of course).
+  analysis process (save for terminal suspend/resume of course).
+
+* Raw key input (when you're given a 1/2 choice) can leave the terminal
+  in uncooked mode.
+
+* Raw key input (when you're given a 1/2 choice) ignores Control commands
+  Like C-c 
 
 
 ### Future

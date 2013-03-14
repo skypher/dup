@@ -78,33 +78,85 @@ if __name__ == "__main__":
         files = sorted(files, key=lambda file: file.size, reverse=True)
 
         nfiles = len(files)
-        lastfile = None
-        i = 0
+
         print("Finding dupes...")
         sys.stdout.flush()
-        for file in files:
-            if (lastfile and file.size == lastfile.size and
-                file.hash() == lastfile.hash()):
-                print("\nDUPES FOUND:\n  SIZE: %s bytes  HASH: %s\n  (1) %s\n  (2) %s\n" %
-                      (file.size_str(), file.hash(), file.name, lastfile.name))
-                sys.stdout.write('Delete which one (1/2)? ')
-                sys.stdout.flush()
 
-                ch = getch()
+        i = 0
+        while i < nfiles:
+            file = files[i]
 
-                print(ch)
-                if ch == '1':
-                    os.remove(file.name)
-                    print('Deleted file %s' % file.name)
-                if ch == '2':
-                    os.remove(lastfile.name)
-                    print('Deleted file %s' % lastfile.name)
-                else:
-                    print()
+            print("(%d/%d) %s" % (i+1, nfiles, file))
 
-            lastfile = file
+            dupes = []
+            for j in range(i+1, nfiles-1):
+              candidate = files[j]
+              if candidate.size != file.size or candidate.hash() != file.hash():
+                  break
+              dupes.append(candidate)
+
+            if dupes:
+                print("\nDUPES FOUND:\n  SIZE: %s bytes  HASH: %s" % (file.size_str(), file.hash()))
+
+                i += len(dupes)
+
+                dupes.insert(0, file)
+
+                k = 1
+                for dupe in dupes:
+                  print("  (%d) %s" % (k, dupe))
+                  k += 1
+
+                print()
+
+                def select_dupes(dupes):
+                    if len(dupes) <= 2:
+                        sys.stdout.write('Delete which one (1/2, <Return> for none)? ')
+                        sys.stdout.flush()
+
+                        ch = getch()
+                        print(ch)
+                        sys.stdout.flush()
+
+                        if (ord(ch) == 13):
+                            return []
+
+                        try:
+                            ch = int(ch)
+                        except ValueError:
+                            return select_dupes(dupes)
+
+                        if ch in [1,2]:
+                            return [dupes[ch-1]]
+                            return select_dupes(dupes)
+                    else:
+                        sys.stdout.write("Delete which ones (e.g. '2,3', <Return> for none)? ")
+                        sys.stdout.flush()
+
+                        selection = input().split(',')
+
+                        if selection == ['']:
+                            return []
+
+                        result = []
+                        for ch in selection:
+                            try:
+                                ch = int(ch)
+                            except ValueError:
+                                return select_dupes(dupes)
+                            result.append(ch)
+
+                        return [dupes[s-1] for s in result]
+
+
+                for dupe in select_dupes(dupes):
+                    os.remove(dupe.name)
+                    print('Deleted file %s' % dupe.name)
+
+                print()
+
             i += 1
-            print("(%d/%d) %s" % (i, nfiles, file))
+
     except BrokenPipeError:
         pass
 
